@@ -65,12 +65,18 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"{StartMenuController.username} : {m_Points}";
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if (m_Points>CanevasManager.bestScore)
+        {
+            PlayerPrefs.SetInt("Score", m_Points);
+            PlayerPrefs.SetString("Best",StartMenuController.username );
+            PlayerPrefs.Save();
+        }
     }
 }
