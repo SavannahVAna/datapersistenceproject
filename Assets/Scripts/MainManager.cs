@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -17,11 +19,15 @@ public class MainManager : MonoBehaviour
     private int m_Points;
     
     private bool m_GameOver = false;
+    private int scoreu =0;
+    private string aaa = " ";
+    private string us;
 
     
     // Start is called before the first frame update
     void Start()
     {
+        LoadColo();
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -57,7 +63,7 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                SceneManager.LoadScene(0);
             }
         }
     }
@@ -65,18 +71,59 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"{StartMenuController.username} : {m_Points}";
+        ScoreText.text = $"{us} : {m_Points}";
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
-        if (m_Points>CanevasManager.bestScore)
+        LoadColor();
+        if (m_Points>scoreu)
         {
-            PlayerPrefs.SetInt("Score", m_Points);
-            PlayerPrefs.SetString("Best",StartMenuController.username );
-            PlayerPrefs.Save();
+            SaveColor();
         }
     }
+    [System.Serializable]
+    public class ScoreBoard
+    {
+        public int score;
+        public string name;
+    }
+    public void SaveColor()
+    {
+        ScoreBoard data = new ScoreBoard();
+        data.score = m_Points;
+        data.name = us;
+
+        string json = JsonUtility.ToJson(data);
+  
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+    
+    public void LoadColor()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            ScoreBoard data = JsonUtility.FromJson<ScoreBoard>(json);
+
+            scoreu = data.score;
+            aaa = data.name;
+        }
+    }
+    
+    public void LoadColo()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            StartMenuController.USernae data = JsonUtility.FromJson<StartMenuController.USernae>(json);
+
+            us = data.username;
+        }
+    }
+
 }
